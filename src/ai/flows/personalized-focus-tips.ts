@@ -13,8 +13,8 @@ import {z} from 'genkit';
 
 const PersonalizedFocusTipsInputSchema = z.object({
   mode: z
-    .enum(['study', 'focus', 'relax'])
-    .describe('The selected mode: study, focus, or relax.'),
+    .enum(['study', 'work', 'relax'])
+    .describe('The selected mode: study, work, or relax.'),
   mood: z.string().describe('The user\s current mood.'),
 });
 export type PersonalizedFocusTipsInput = z.infer<typeof PersonalizedFocusTipsInputSchema>;

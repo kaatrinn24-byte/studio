@@ -6,19 +6,19 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import type { ChartConfig } from "@/components/ui/chart";
 
 const chartData = [
-  { month: 'Week 1', study: 4, focus: 2.5, relax: 1 },
-  { month: 'Week 2', study: 3, focus: 2, relax: 3 },
-  { month: 'Week 3', study: 5, focus: 3, relax: 1.5 },
-  { month: 'Week 4', study: 4.5, focus: 4, relax: 2 },
+  { month: 'Week 1', study: 4, work: 2.5, relax: 1 },
+  { month: 'Week 2', study: 3, work: 2, relax: 3 },
+  { month: 'Week 3', study: 5, work: 3, relax: 1.5 },
+  { month: 'Week 4', study: 4.5, work: 4, relax: 2 },
 ];
 
 const chartConfig = {
-  study: { label: 'Study', color: 'hsl(var(--chart-1))' },
-  focus: { label: 'Focus', color: 'hsl(var(--chart-2))' },
+  study: { label: 'Study', color: 'hsl(var(--secondary))' },
+  work: { label: 'Work', color: 'hsl(var(--primary))' },
   relax: { label: 'Relax', color: 'hsl(var(--chart-3))' },
 } satisfies ChartConfig;
 
-const totalTime = chartData.reduce((acc, week) => acc + week.study + week.focus + week.relax, 0);
+const totalTime = chartData.reduce((acc, week) => acc + week.study + week.work + week.relax, 0);
 
 export default function StatsPage() {
   return (
@@ -58,7 +58,7 @@ export default function StatsPage() {
                             <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
                             <ChartLegend content={<ChartLegendContent />} />
                             <Bar dataKey="study" fill="var(--color-study)" radius={4} />
-                            <Bar dataKey="focus" fill="var(--color-focus)" radius={4} />
+                            <Bar dataKey="work" fill="var(--color-work)" radius={4} />
                             <Bar dataKey="relax" fill="var(--color-relax)" radius={4} />
                         </BarChart>
                     </ChartContainer>

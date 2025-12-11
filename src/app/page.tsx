@@ -10,18 +10,18 @@ const modes = [
     description: 'Deep work & notes',
     icon: BookOpen,
     href: '/study',
+    colorClass: 'text-secondary',
+    bgClass: 'bg-secondary/10',
+    borderClass: 'hover:border-secondary/50'
+  },
+  {
+    name: 'Work',
+    description: 'Intense concentration',
+    icon: Crosshair,
+    href: '/work',
     colorClass: 'text-primary',
     bgClass: 'bg-primary/10',
     borderClass: 'hover:border-primary/50'
-  },
-  {
-    name: 'Focus',
-    description: 'Intense concentration',
-    icon: Crosshair,
-    href: '/focus',
-    colorClass: 'text-destructive',
-    bgClass: 'bg-destructive/10',
-    borderClass: 'hover:border-destructive/50'
   },
   {
     name: 'Relax',
