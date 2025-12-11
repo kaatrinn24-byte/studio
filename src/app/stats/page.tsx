@@ -13,8 +13,8 @@ const chartData = [
 ];
 
 const chartConfig = {
-  study: { label: 'Study', color: 'hsl(var(--secondary))' },
-  work: { label: 'Work', color: 'hsl(var(--primary))' },
+  study: { label: 'Study', color: 'hsl(var(--chart-2))' },
+  work: { label: 'Work', color: 'hsl(var(--chart-1))' },
   relax: { label: 'Relax', color: 'hsl(var(--chart-3))' },
 } satisfies ChartConfig;
 

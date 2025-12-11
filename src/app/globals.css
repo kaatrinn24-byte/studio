@@ -10,22 +10,22 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 250 80% 90%; /* soft lavender #E6E6FA */
-    --primary-foreground: 250 40% 30%;
-    --secondary: 200 88% 90%; /* Light sky blue #DDEEFF (derived from #87CEEB) */
-    --secondary-foreground: 200 40% 30%;
+    --primary: 340 90% 75%; /* soft pink */
+    --primary-foreground: 340 90% 15%;
+    --secondary: 210 90% 75%; /* soft blue */
+    --secondary-foreground: 210 90% 15%;
     --muted: 240 5% 96%;
     --muted-foreground: 240 4% 46%;
-    --accent: 200 88% 90%; /* light sky blue #87CEEB */
-    --accent-foreground: 200 40% 30%;
+    --accent: 210 90% 85%; /* soft blue */
+    --accent-foreground: 210 40% 30%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 6% 90%;
     --input: 240 6% 90%;
-    --ring: 250 80% 90%;
-    --chart-1: 250 80% 90%;
-    --chart-2: 200 88% 85%;
-    --chart-3: 142 76% 36%;
+    --ring: 340 90% 75%;
+    --chart-1: 340 90% 75%;
+    --chart-2: 210 90% 75%;
+    --chart-3: 260 90% 80%; /* soft purple */
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 1rem;
@@ -53,7 +53,7 @@
     --ring: 340 90% 75%;
     --chart-1: 340 90% 75%;
     --chart-2: 210 90% 75%;
-    --chart-3: 142 76% 60%;
+    --chart-3: 260 90% 80%; /* soft purple */
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 1rem;
