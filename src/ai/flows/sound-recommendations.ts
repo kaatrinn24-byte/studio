@@ -11,7 +11,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const SoundRecommendationSchema = z.object({
+const SoundRecommendationSchema = z.object({
   source: z.string().describe('Source of the music platform (e.g., Spotify, YouTube).'),
   soundName: z.string().describe('Name of the sound/song.'),
   soundUrl: z.string().url().describe('URL for the song/sound.'),
@@ -30,24 +30,6 @@ const SoundRecommendationsOutputSchema = z.object({
 });
 export type SoundRecommendationsOutput = z.infer<typeof SoundRecommendationsOutputSchema>;
 
-export async function generateSoundRecommendations(
-  input: SoundRecommendationsInput
-): Promise<SoundRecommendationsOutput> {
-  return soundRecommendationsFlow(input);
-}
-
-const prompt = ai.definePrompt({
-  name: 'soundRecommendationsPrompt',
-  input: { schema: SoundRecommendationsInputSchema },
-  output: { schema: SoundRecommendationsOutputSchema },
-  prompt: `You are an AI assistant that recommends sounds and music for focus, study, and relaxation.
-
-  The user is feeling: {{{mood}}}
-
-  Based on their mood, provide a list of 3 diverse sound recommendations from platforms like Spotify or YouTube. For each recommendation, provide the platform, the name of the sound/song, a valid URL, and a brief reason why it's a good fit for their mood.
-  `,
-});
-
 const soundRecommendationsFlow = ai.defineFlow(
   {
     name: 'soundRecommendationsFlow',
@@ -55,7 +37,27 @@ const soundRecommendationsFlow = ai.defineFlow(
     outputSchema: SoundRecommendationsOutputSchema,
   },
   async (input) => {
+    const prompt = ai.definePrompt({
+        name: 'soundRecommendationsPrompt',
+        input: { schema: SoundRecommendationsInputSchema },
+        output: { schema: SoundRecommendationsOutputSchema },
+        prompt: `You are an AI assistant that recommends sounds and music for focus, study, and relaxation.
+      
+        The user is feeling: {{{mood}}}
+      
+        Based on their mood, provide a list of 3 diverse sound recommendations from platforms like Spotify or YouTube. For each recommendation, provide the platform, the name of the sound/song, a valid URL, and a brief reason why it's a good fit for their mood.
+        `,
+      });
+
     const { output } = await prompt(input);
     return output!;
   }
 );
+
+
+export async function generateSoundRecommendations(
+    input: SoundRecommendationsInput
+  ): Promise<SoundRecommendationsOutput> {
+    return soundRecommendationsFlow(input);
+  }
+  
