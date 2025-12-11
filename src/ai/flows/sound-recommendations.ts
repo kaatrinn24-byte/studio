@@ -45,7 +45,8 @@ const soundRecommendationsFlow = ai.defineFlow(
       
         The user is feeling: {{{mood}}}
       
-        Based on their mood, provide a list of 3 diverse sound recommendations from platforms like Spotify or YouTube. For each recommendation, provide the platform, the name of the sound/song, a valid URL, and a brief reason why it's a good fit for their mood.
+        Based on their mood, provide a list of 3 diverse sound recommendations from platforms like Spotify or YouTube. For each recommendation, provide the platform, the name of the sound/song, a valid and publicly accessible URL, and a brief reason why it's a good fit for their mood.
+        Ensure the URLs are direct links to the content and not search queries.
         `,
       });
 

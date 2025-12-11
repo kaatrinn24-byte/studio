@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from './ui/button';
 import { Pause, Play, RotateCcw, X } from 'lucide-react';
@@ -10,17 +10,33 @@ export default function Timer() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const initialDuration = parseInt(searchParams.get('duration') || '15', 10) * 60;
-    const soundscape = searchParams.get('sound') || 'Lofi Beats';
+    const soundscapeName = searchParams.get('soundName') || 'Lofi Beats';
+    const soundscapeUrl = searchParams.get('soundUrl');
 
     const [timeLeft, setTimeLeft] = useState(initialDuration);
     const [isActive, setIsActive] = useState(true);
     const [isComplete, setIsComplete] = useState(false);
 
+    const audioRef = useRef<HTMLAudioElement>(null);
+
+    useEffect(() => {
+        if (isComplete) return;
+
+        if (isActive) {
+            audioRef.current?.play().catch(e => console.error("Audio play failed", e));
+        } else {
+            audioRef.current?.pause();
+        }
+    }, [isActive, isComplete]);
+
     useEffect(() => {
         if (timeLeft <= 0) {
             setIsActive(false);
             setIsComplete(true);
-            // Optionally play a sound
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+            }
             return;
         }
 
@@ -44,7 +60,18 @@ export default function Timer() {
         setIsActive(false);
         setTimeLeft(initialDuration);
         setIsComplete(false);
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+        }
     };
+    
+    const endSession = () => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
+        router.push('/');
+    }
 
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
@@ -58,6 +85,9 @@ export default function Timer() {
 
     return (
         <div className="flex flex-col items-center justify-center h-full bg-background p-8 text-center">
+             {soundscapeUrl && (
+                <audio ref={audioRef} src={decodeURIComponent(soundscapeUrl)} loop preload="auto" />
+            )}
             <div className="relative w-72 h-72">
                 <svg className="w-full h-full" viewBox="0 0 100 100">
                     <circle
@@ -100,14 +130,14 @@ export default function Timer() {
                     {isActive ? <Pause className="w-10 h-10" /> : <Play className="w-10 h-10 ml-1" />}
                     <span className="sr-only">{isActive ? 'Pause' : 'Play'}</span>
                 </Button>
-                <Button variant="destructive" size="icon" className="w-16 h-16 rounded-full" onClick={() => router.push('/')}>
+                <Button variant="destructive" size="icon" className="w-16 h-16 rounded-full" onClick={endSession}>
                     <X className="w-8 h-8" />
                     <span className="sr-only">End session</span>
                 </Button>
             </div>
 
             <div className="mt-8 text-muted-foreground capitalize">
-                <p>🎶 Playing: {decodeURIComponent(soundscape)}</p>
+                <p>🎶 Playing: {decodeURIComponent(soundscapeName)}</p>
             </div>
         </div>
     );

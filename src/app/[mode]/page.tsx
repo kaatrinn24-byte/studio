@@ -15,10 +15,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const durations = [15, 30, 60];
 
-const staticSoundscapes = [
-  { soundName: 'Lofi Beats', soundUrl: 'lofi', recommendationReason: 'Chill & study' },
-  { soundName: 'Rainy Day', soundUrl: 'rain', recommendationReason: 'Calm & focus' },
-  { soundName: 'Forest Walk', soundUrl: 'forest', recommendationReason: 'Nature & relax' },
+const staticSoundscapes: SoundRecommendation[] = [
+  { soundName: 'Lofi Beats', soundUrl: '/sounds/lofi.mp3', recommendationReason: 'Chill & study', source: 'local' },
+  { soundName: 'Rainy Day', soundUrl: '/sounds/rain.mp3', recommendationReason: 'Calm & focus', source: 'local' },
+  { soundName: 'Forest Walk', soundUrl: '/sounds/forest.mp3', recommendationReason: 'Nature & relax', source: 'local' },
 ];
 
 export default function ModeSetupPage() {
@@ -41,7 +41,7 @@ export default function ModeSetupPage() {
         try {
           const result = await generateSoundRecommendations({ mood });
           if (result.recommendations && result.recommendations.length > 0) {
-            setSoundscapes(result.recommendations);
+            setSoundscapes([...result.recommendations, ...staticSoundscapes]);
             setSelectedSoundscape(result.recommendations[0].soundUrl);
           }
         } catch (error) {
@@ -57,8 +57,9 @@ export default function ModeSetupPage() {
   }, [mood, toast]);
   
   const handleStart = () => {
-    const soundName = soundscapes.find(s => s.soundUrl === selectedSoundscape)?.soundName || 'selected sound';
-    router.push(`/${mode}/session?duration=${selectedDuration}&sound=${encodeURIComponent(soundName)}`);
+    const sound = soundscapes.find(s => s.soundUrl === selectedSoundscape);
+    if (!sound) return;
+    router.push(`/${mode}/session?duration=${selectedDuration}&soundName=${encodeURIComponent(sound.soundName)}&soundUrl=${encodeURIComponent(sound.soundUrl)}`);
   }
 
   return (
@@ -97,31 +98,25 @@ export default function ModeSetupPage() {
         <section>
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
               <Music className="w-5 h-5" />
-              AI Soundscape for a {mood} mood
+              AI Soundscape {mood ? `for a ${mood} mood` : ''}
             </h2>
             {isGenerating ? (
               <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Skeleton className="h-28 w-full rounded-lg" />
-                  <Skeleton className="h-4 w-2/3 mx-auto" />
-                   <Skeleton className="h-3 w-1/2 mx-auto" />
-                </div>
-                <div className="space-y-2">
-                  <Skeleton className="h-28 w-full rounded-lg" />
-                  <Skeleton className="h-4 w-2/3 mx-auto" />
-                   <Skeleton className="h-3 w-1/2 mx-auto" />
-                </div>
-                <div className="space-y-2">
-                  <Skeleton className="h-28 w-full rounded-lg" />
-                  <Skeleton className="h-4 w-2/3 mx-auto" />
-                   <Skeleton className="h-3 w-1/2 mx-auto" />
-                </div>
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-28 w-full rounded-lg" />
+                    <Skeleton className="h-4 w-2/3 mx-auto" />
+                    <Skeleton className="h-3 w-1/2 mx-auto" />
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {soundscapes.map((sound, index) => {
                       const isActive = selectedSoundscape === sound.soundUrl;
-                      const imageUrl = `https://picsum.photos/seed/${sound.soundName.replace(/\s+/g, '-')}/200/200`;
+                      const imageUrl = sound.source === 'local' 
+                        ? `/images/soundscape-${sound.soundName.toLowerCase().replace(' ', '-')}.jpg` 
+                        : `https://picsum.photos/seed/${sound.soundName.replace(/\s+/g, '-')}/200/200`;
                       return (
                           <div key={index} className="cursor-pointer group" onClick={() => setSelectedSoundscape(sound.soundUrl)}>
                               <Card className={cn("overflow-hidden transition-all", isActive && "ring-2 ring-primary")}>
