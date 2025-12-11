@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Settings, BookOpen, Crosshair, Headphones, Loader2, Lightbulb } from "lucide-react";
+import { BookOpen, Crosshair, Headphones, Loader2, Lightbulb } from "lucide-react";
 import { ModeCard } from "@/components/mode-card";
 import {
   Dialog,
@@ -122,9 +122,6 @@ export default function Home() {
               <h2 className="text-xl font-bold leading-tight text-foreground">{user.displayName || user.email}</h2>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full bg-card border-border/50 border">
-            <Settings className="h-5 w-5" />
-          </Button>
         </header>
         <div className="flex-1 flex flex-col p-6 pt-2 z-10">
           <div className="mb-8">
@@ -139,9 +136,6 @@ export default function Home() {
                     <ModeCard {...mode} />
                 </div>
             ))}
-          </div>
-          <div className="mt-auto pt-10 text-center opacity-60">
-            <p className="text-sm font-medium tracking-wide">"One step at a time."</p>
           </div>
         </div>
       </div>

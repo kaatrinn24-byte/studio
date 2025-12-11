@@ -5,7 +5,7 @@ import { useAuth, useUser } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, LogOut, Medal, Star, Zap } from "lucide-react";
+import { Loader2, LogOut, Medal, Settings, Star, Zap } from "lucide-react";
 
 export default function ProfilePage() {
     const { user, isUserLoading } = useUser();
@@ -64,8 +64,11 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
                  <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Account</CardTitle>
+                        <Button variant="ghost" size="icon">
+                            <Settings className="h-5 w-5" />
+                        </Button>
                     </CardHeader>
                     <CardContent>
                         <Button variant="destructive" className="w-full" onClick={handleSignOut}>
