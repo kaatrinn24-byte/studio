@@ -1,0 +1,181 @@
+/**
+ * This is a set of Firestore Security Rules for the ZenithFlow application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model. All user-generated content,
+ * such as focus sessions, monthly summaries, earned rewards, and sound recommendations,
+ * is stored in subcollections under that user's specific document. This ensures that
+ * users can only ever access their own data, providing strong security and privacy by default.
+ *
+ * Data Structure:
+ * All user-specific data is nested hierarchically under `/users/{userId}`. This includes
+ * subcollections like `/sessions`, `/monthlySummaries`, `/userRewards`, and `/soundRecommendations`.
+ * A top-level `/rewards` collection stores global data that is publicly readable but not publicly writable.
+ *
+ * Key Security Decisions:
+ * - Strict Ownership: Access to any document within the `/users/{userId}` tree is
+ *   granted only if the requesting user's UID matches the `{userId}` in the path.
+ * - No User Enumeration: Listing documents from the top-level `/users` collection is
+ *   explicitly disallowed to prevent scraping user profile information.
+ * - Read-Only Global Data: The `/rewards` collection is readable by any user, signed in or not,
+ *   but all write operations are disabled pending the implementation of an admin-only role system.
+ * - Default Secure: Any path not explicitly matched is denied access. All write operations
+ *   require authentication and authorization.
+ *
+ * Denormalization for Authorization:
+ * The security model relies on path-based authorization, which is a highly performant pattern.
+ * For documents within user-specific subcollections (e.g., a Session), a `userId` field is
+ * required on the document itself. This allows rules to enforce on write operations that the
+ * document's internal `userId` matches the `userId` in the path, ensuring data integrity and
+ * preventing a document from being created under the wrong user.
+ *
+ * Structural Segregation:
+ * The ruleset separates user-private data (under `/users/{userId}`) from globally public data
+ * (`/rewards`). This clear separation allows for simple and highly performant rules for list
+ * operations, as private collections can be secured by the path and public collections can be
+ * opened up without exposing any private information.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for concise, readable, and maintainable rules.
+    
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the authenticated user's UID matches the provided userId.
+     * This is the primary function for enforcing data ownership.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks for ownership on an existing document. Used for update and delete
+     * operations to prevent acting on documents that don't exist.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description
+     *   Manages user profile documents. A user can create their own profile,
+     *   read and update it, but cannot delete it or see other users' profiles.
+     * @path `/users/{userId}`
+     * @allow (create) A new user with uid `user_abc` creating their own profile at `/users/user_abc`.
+     * @deny (list) Any user trying to list all documents in the `/users` collection.
+     * @deny (delete) A user trying to delete their own profile.
+     * @principle
+     *   Enforces self-creation and ownership, while preventing user enumeration for privacy.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if false;
+    }
+
+    /**
+     * @description
+     *   Secures a user's focus session data. Only the owner can perform any
+     *   operation on their own session documents.
+     * @path `/users/{userId}/sessions/{sessionId}`
+     * @allow (create) An authenticated user `user_abc` creating a new session at `/users/user_abc/sessions/session_123`.
+     * @deny (get) A different user `user_xyz` trying to read a session at `/users/user_abc/sessions/session_123`.
+     * @principle
+     *   Restricts access to a user's own data tree through path-based ownership.
+     */
+    match /users/{userId}/sessions/{sessionId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description
+     *   Secures a user's monthly summary data. Only the owner can access their
+     *   own summary documents.
+     * @path `/users/{userId}/monthlySummaries/{summaryId}`
+     * @allow (list) An authenticated user `user_abc` listing their summaries at `/users/user_abc/monthlySummaries`.
+     * @deny (create) A different user `user_xyz` trying to create a summary at `/users/user_abc/monthlySummaries/summary_123`.
+     * @principle
+     *   Restricts access to a user's own data tree through path-based ownership.
+     */
+    match /users/{userId}/monthlySummaries/{summaryId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description
+     *   Secures records of rewards earned by a user. Only the user can view
+     *   and manage their list of earned rewards.
+     * @path `/users/{userId}/userRewards/{userRewardId}`
+     * @allow (get) An authenticated user `user_abc` reading their reward at `/users/user_abc/userRewards/reward_123`.
+     * @deny (update) A different user `user_xyz` trying to update a reward at `/users/user_abc/userRewards/reward_123`.
+     * @principle
+     *   Restricts access to a user's own data tree through path-based ownership.
+     */
+    match /users/{userId}/userRewards/{userRewardId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description
+     *   Secures AI-generated sound recommendations for a user. Only the owner
+     *   can access their recommendations.
+     * @path `/users/{userId}/soundRecommendations/{soundRecommendationId}`
+     * @allow (list) An authenticated user `user_abc` listing their recommendations at `/users/user_abc/soundRecommendations`.
+     * @deny (delete) A different user `user_xyz` trying to delete a recommendation at `/users/user_abc/soundRecommendations/rec_123`.
+     * @principle
+     *   Restricts access to a user's own data tree through path-based ownership.
+     */
+    match /users/{userId}/soundRecommendations/{soundRecommendationId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+    
+    /**
+     * @description
+     *   Manages the global list of available rewards. This data is public for
+     *   all users to read, but cannot be modified by clients.
+     * @path `/rewards/{rewardId}`
+     * @allow (get) Any user, including unauthenticated ones, reading a reward at `/rewards/reward_123`.
+     * @deny (create) Any authenticated user trying to create a new reward.
+     * @principle
+     *   Provides public read access for global data while securing write operations.
+     *   Writes are disabled until an admin role system is implemented.
+     */
+    match /rewards/{rewardId} {
+      allow get: if true;
+      allow list: if true;
+      // CRITICAL: Cannot implement admin-only writes. The 'Reward' entity has no
+      // 'ownerId' or equivalent field, and no admin system is defined. Disabling
+      // all writes until this is specified in the application backend.
+      allow create: if false; // TODO: Implement admin-only creation logic.
+      allow update: if false; // TODO: Implement admin-only update logic.
+      allow delete: if false; // TODO: Implement admin-only deletion logic.
+    }
+
+  }
+}

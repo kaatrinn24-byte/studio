@@ -1,0 +1,364 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the ZenithFlow application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "username": {
+          "type": "string",
+          "description": "The username of the user."
+        },
+        "registrationDate": {
+          "type": "string",
+          "description": "Date and time the user registered.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "username",
+        "registrationDate"
+      ]
+    },
+    "Session": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Session",
+      "type": "object",
+      "description": "Represents a focus session completed by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Session entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Session)"
+        },
+        "mode": {
+          "type": "string",
+          "description": "The mode used for the session (Study, Focus, Relax)."
+        },
+        "duration": {
+          "type": "number",
+          "description": "Duration of the session in minutes."
+        },
+        "startTime": {
+          "type": "string",
+          "description": "Date and time the session started.",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "description": "Date and time the session ended.",
+          "format": "date-time"
+        },
+        "success": {
+          "type": "boolean",
+          "description": "Indicates if the session was successfully completed."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "mode",
+        "duration",
+        "startTime",
+        "endTime",
+        "success"
+      ]
+    },
+    "MonthlySummary": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MonthlySummary",
+      "type": "object",
+      "description": "Represents a monthly summary of a user's activity.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the MonthlySummary entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N MonthlySummary)"
+        },
+        "month": {
+          "type": "number",
+          "description": "The month the summary is for (1-12)."
+        },
+        "year": {
+          "type": "number",
+          "description": "The year the summary is for."
+        },
+        "totalSessions": {
+          "type": "number",
+          "description": "Total number of sessions completed in the month."
+        },
+        "totalTime": {
+          "type": "number",
+          "description": "Total time spent in sessions in minutes."
+        },
+        "studyTime": {
+          "type": "number",
+          "description": "Total time spent in Study mode in minutes."
+        },
+        "focusTime": {
+          "type": "number",
+          "description": "Total time spent in Focus mode in minutes."
+        },
+        "relaxTime": {
+          "type": "number",
+          "description": "Total time spent in Relax mode in minutes."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "month",
+        "year",
+        "totalSessions",
+        "totalTime",
+        "studyTime",
+        "focusTime",
+        "relaxTime"
+      ]
+    },
+    "Reward": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Reward",
+      "type": "object",
+      "description": "Represents a virtual reward given to a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Reward entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the reward."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the reward."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the image representing the reward.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "imageUrl"
+      ]
+    },
+    "UserReward": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserReward",
+      "type": "object",
+      "description": "Represents the rewards given to a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserReward entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N UserReward)"
+        },
+        "rewardId": {
+          "type": "string",
+          "description": "Reference to Reward. (Relationship: Reward 1:N UserReward)"
+        },
+        "dateReceived": {
+          "type": "string",
+          "description": "The date that the user receive the reward.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "rewardId",
+        "dateReceived"
+      ]
+    },
+    "SoundRecommendation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SoundRecommendation",
+      "type": "object",
+      "description": "Represents a sound recommendation based on user preference.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the SoundRecommendation entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N SoundRecommendation)"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of the music platform."
+        },
+        "soundName": {
+          "type": "string",
+          "description": "Name of the sound/song."
+        },
+        "soundUrl": {
+          "type": "string",
+          "description": "URL for the song/sound.",
+          "format": "uri"
+        },
+        "recommendationReason": {
+          "type": "string",
+          "description": "Reason for the recommendation."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "source",
+        "soundName",
+        "soundUrl",
+        "recommendationReason"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile data.  Path-based ownership.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/sessions/{sessionId}",
+        "definition": {
+          "entityName": "Session",
+          "schema": {
+            "$ref": "#/backend/entities/Session"
+          },
+          "description": "Stores focus session data for a specific user. Path-based ownership.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "sessionId",
+              "description": "The unique identifier of the session."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/monthlySummaries/{summaryId}",
+        "definition": {
+          "entityName": "MonthlySummary",
+          "schema": {
+            "$ref": "#/backend/entities/MonthlySummary"
+          },
+          "description": "Stores monthly summary data for a specific user. Path-based ownership.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "summaryId",
+              "description": "The unique identifier of the monthly summary."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/rewards/{rewardId}",
+        "definition": {
+          "entityName": "Reward",
+          "schema": {
+            "$ref": "#/backend/entities/Reward"
+          },
+          "description": "Stores reward data. Accessible by all users, but creation/modification should be restricted.",
+          "params": [
+            {
+              "name": "rewardId",
+              "description": "The unique identifier of the reward."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/userRewards/{userRewardId}",
+        "definition": {
+          "entityName": "UserReward",
+          "schema": {
+            "$ref": "#/backend/entities/UserReward"
+          },
+          "description": "Stores user reward data for a specific user. Path-based ownership.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "userRewardId",
+              "description": "The unique identifier of the user reward."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/soundRecommendations/{soundRecommendationId}",
+        "definition": {
+          "entityName": "SoundRecommendation",
+          "schema": {
+            "$ref": "#/backend/entities/SoundRecommendation"
+          },
+          "description": "Stores AI sound recommendations for a specific user. Path-based ownership.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "soundRecommendationId",
+              "description": "The unique identifier of the sound recommendation."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to ensure security, scalability, and ease of debugging, while adhering to the principles of Authorization Independence, Clarity of Intent, DBAC (Database Auth Based on Content), and QAPs (Rules are not Filters). User data, focus sessions, monthly summaries, rewards, and AI sound recommendations are structured to optimize data access and security rules.\n\n1.  **Authorization Independence:** This is achieved through path-based ownership for user-specific data. The `sessions`, `monthlySummaries`, `userRewards`, and `soundRecommendations` subcollections are located under `/users/{userId}`, eliminating the need for `get()` calls in security rules to validate ownership.\n2.  **Clarity of Intent:** The data structure clearly separates user data and related entities, making security rules straightforward to define and understand.\n3.  **DBAC (No Custom Claims):** Authorization is based solely on `request.auth.uid` and path-based ownership, avoiding the complexity and potential security issues of custom claims.\n4.  **QAPs (Rules are not Filters):** Segregation of data into user-owned subcollections allows for secure list operations (QAPs). Rules can easily filter based on `request.auth.uid == userId` to ensure users can only access their own data. The structure also supports the integrity of ownership, timestamps, and denormalized data.\n\n**Detailed Explanation:**\n\n*   **/users/{userId}**: Stores core user information. This collection is path-based, ensuring clear ownership and simplifying security rules. All user-related data is stored under this path.\n*   **/users/{userId}/sessions/{sessionId}**: Stores focus sessions for each user. Path-based ownership ensures that only the user can access their own sessions.\n*   **/users/{userId}/monthlySummaries/{summaryId}**: Stores monthly summaries for each user. Path-based ownership ensures users can only access their own summaries.\n*   **/rewards/{rewardId}**: Stores global reward data. Accessible for reading by all users, but creation/modification is restricted to admins (this could be managed by a separate admin role collection if needed).\n*   **/users/{userId}/userRewards/{userRewardId}**: Stores the rewards that each user has received.  Path-based ownership, ensuring that only the user can access their own rewards.\n*   **/users/{userId}/soundRecommendations/{soundRecommendationId}**: Store the song recommendations that the ai gives to each user,  Path-based ownership, ensuring that only the user can access their own sound recommendations."
+  }
+}
