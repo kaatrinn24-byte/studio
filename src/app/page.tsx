@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Settings, BookOpen, Crosshair, Headphones, Loader2, Lightbulb } from "lucide-react";
 import { ModeCard } from "@/components/mode-card";
-import { placeholderImages } from "@/lib/placeholder-images";
 import {
   Dialog,
   DialogContent,
@@ -67,8 +66,6 @@ export default function Home() {
       router.replace('/login');
     }
   }, [user, isUserLoading, router]);
-
-  const userImage = placeholderImages.find(p => p.id === 'user-avatar');
   
   const handleModeClick = (mode: { name: string; href: string; }) => {
     setSelectedMode(mode);
@@ -97,9 +94,9 @@ export default function Home() {
   };
 
   const handleProceed = () => {
-    if (selectedMode) {
+    if (selectedMode && selectedMood) {
       setIsDialogOpen(false);
-      router.push(selectedMode.href);
+      router.push(`${selectedMode.href}?mood=${encodeURIComponent(selectedMood)}`);
     }
   };
   

@@ -1,33 +1,64 @@
 'use client';
 
-import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useTransition } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Music, PlayCircle, Timer as TimerIcon } from 'lucide-react';
+import { ArrowLeft, Music, PlayCircle, Timer as TimerIcon, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { placeholderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { generateSoundRecommendations, SoundRecommendation } from '@/ai/flows/sound-recommendations';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const durations = [15, 30, 60];
-const soundscapes = [
-  { id: 'lofi', name: 'Lofi Beats', description: 'Chill & study', imageId: 'soundscape-1' },
-  { id: 'rain', name: 'Rainy Day', description: 'Calm & focus', imageId: 'soundscape-2' },
-  { id: 'forest', name: 'Forest Walk', description: 'Nature & relax', imageId: 'soundscape-3' },
+
+const staticSoundscapes = [
+  { soundName: 'Lofi Beats', soundUrl: 'lofi', recommendationReason: 'Chill & study' },
+  { soundName: 'Rainy Day', soundUrl: 'rain', recommendationReason: 'Calm & focus' },
+  { soundName: 'Forest Walk', soundUrl: 'forest', recommendationReason: 'Nature & relax' },
 ];
 
 export default function ModeSetupPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
+  
   const mode = Array.isArray(params.mode) ? params.mode[0] : String(params.mode);
+  const mood = searchParams.get('mood');
 
   const [selectedDuration, setSelectedDuration] = useState<number>(30);
-  const [selectedSoundscape, setSelectedSoundscape] = useState<string>('lofi');
+  const [soundscapes, setSoundscapes] = useState<SoundRecommendation[]>(staticSoundscapes);
+  const [selectedSoundscape, setSelectedSoundscape] = useState<string>(staticSoundscapes[0].soundUrl);
+  const [isGenerating, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (mood) {
+      startTransition(async () => {
+        try {
+          const result = await generateSoundRecommendations({ mood });
+          if (result.recommendations && result.recommendations.length > 0) {
+            setSoundscapes(result.recommendations);
+            setSelectedSoundscape(result.recommendations[0].soundUrl);
+          }
+        } catch (error) {
+          console.error('Failed to get recommendations', error);
+          toast({
+            title: 'AI Error',
+            description: 'Could not generate soundscapes. Using defaults.',
+            variant: 'destructive',
+          });
+        }
+      });
+    }
+  }, [mood, toast]);
   
   const handleStart = () => {
-    router.push(`/${mode}/session?duration=${selectedDuration}&sound=${selectedSoundscape}`);
+    const soundName = soundscapes.find(s => s.soundUrl === selectedSoundscape)?.soundName || 'selected sound';
+    router.push(`/${mode}/session?duration=${selectedDuration}&sound=${encodeURIComponent(soundName)}`);
   }
 
   return (
@@ -64,22 +95,45 @@ export default function ModeSetupPage() {
         </section>
 
         <section>
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Music className="w-5 h-5" />Soundscape</h2>
-            <div className="grid grid-cols-3 gap-4">
-                {soundscapes.map((sound) => {
-                    const image = placeholderImages.find(p => p.id === sound.imageId);
-                    const isActive = selectedSoundscape === sound.id;
-                    return (
-                        <div key={sound.id} className="cursor-pointer group" onClick={() => setSelectedSoundscape(sound.id)}>
-                            <Card className={cn("overflow-hidden transition-all", isActive && "ring-2 ring-primary")}>
-                                {image && <Image src={image.imageUrl} alt={sound.name} width={200} height={200} className="aspect-square object-cover transition-transform group-hover:scale-105" data-ai-hint={image.imageHint} />}
-                            </Card>
-                            <p className="font-semibold mt-2 text-sm text-center">{sound.name}</p>
-                            <p className="text-xs text-muted-foreground text-center">{sound.description}</p>
-                        </div>
-                    )
-                })}
-            </div>
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Music className="w-5 h-5" />
+              AI Soundscape for a {mood} mood
+            </h2>
+            {isGenerating ? (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-28 w-full rounded-lg" />
+                  <Skeleton className="h-4 w-2/3 mx-auto" />
+                   <Skeleton className="h-3 w-1/2 mx-auto" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-28 w-full rounded-lg" />
+                  <Skeleton className="h-4 w-2/3 mx-auto" />
+                   <Skeleton className="h-3 w-1/2 mx-auto" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-28 w-full rounded-lg" />
+                  <Skeleton className="h-4 w-2/3 mx-auto" />
+                   <Skeleton className="h-3 w-1/2 mx-auto" />
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-4">
+                  {soundscapes.map((sound, index) => {
+                      const isActive = selectedSoundscape === sound.soundUrl;
+                      const imageUrl = `https://picsum.photos/seed/${sound.soundName.replace(/\s+/g, '-')}/200/200`;
+                      return (
+                          <div key={index} className="cursor-pointer group" onClick={() => setSelectedSoundscape(sound.soundUrl)}>
+                              <Card className={cn("overflow-hidden transition-all", isActive && "ring-2 ring-primary")}>
+                                  <Image src={imageUrl} alt={sound.soundName} width={200} height={200} className="aspect-square object-cover transition-transform group-hover:scale-105" data-ai-hint="abstract music" />
+                              </Card>
+                              <p className="font-semibold mt-2 text-sm text-center">{sound.soundName}</p>
+                              <p className="text-xs text-muted-foreground text-center truncate">{sound.recommendationReason}</p>
+                          </div>
+                      )
+                  })}
+              </div>
+            )}
         </section>
       </div>
 

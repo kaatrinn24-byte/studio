@@ -107,7 +107,7 @@ export default function Timer() {
             </div>
 
             <div className="mt-8 text-muted-foreground capitalize">
-                <p>🎶 Playing: {soundscape.replace('-', ' ')}</p>
+                <p>🎶 Playing: {decodeURIComponent(soundscape)}</p>
             </div>
         </div>
     );
