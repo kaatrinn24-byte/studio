@@ -16,7 +16,7 @@ type ModeCardProps = {
 
 export function ModeCard({ icon: Icon, name, description, href, colorClass, bgClass, borderClass }: ModeCardProps) {
   return (
-    <Link href={href} className="group block">
+    <div className="group block cursor-pointer">
       <Card className={cn("overflow-hidden transition-all active:scale-[0.98] border-border/50", borderClass)}>
         <div className="flex items-center gap-5 p-5">
           <div className={cn("flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl", bgClass)}>
@@ -31,6 +31,6 @@ export function ModeCard({ icon: Icon, name, description, href, colorClass, bgCl
           </div>
         </div>
       </Card>
-    </Link>
+    </div>
   );
 }
