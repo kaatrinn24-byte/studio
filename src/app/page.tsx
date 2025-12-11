@@ -1,6 +1,11 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Settings, BookOpen, Crosshair, Headphones } from "lucide-react";
+import { Settings, BookOpen, Crosshair, Headphones, Loader2 } from "lucide-react";
 import { ModeCard } from "@/components/mode-card";
 import { placeholderImages } from "@/lib/placeholder-images";
 
@@ -35,19 +40,36 @@ const modes = [
 ];
 
 export default function Home() {
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.replace('/login');
+    }
+  }, [user, isUserLoading, router]);
+
   const userImage = placeholderImages.find(p => p.id === 'user-avatar');
+  
+  if (isUserLoading || !user) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-center justify-between p-6 z-10">
         <div className="flex items-center gap-4">
           <Avatar className="h-12 w-12 border-2 border-primary/50">
-            {userImage && <AvatarImage src={userImage.imageUrl} alt={userImage.description} data-ai-hint={userImage.imageHint} />}
-            <AvatarFallback>ZF</AvatarFallback>
+            {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />}
+            <AvatarFallback>{user.displayName ? user.displayName.charAt(0) : (user.email ? user.email.charAt(0).toUpperCase() : 'U')}</AvatarFallback>
           </Avatar>
           <div>
             <span className="text-xs font-medium uppercase text-primary">Welcome back</span>
-            <h2 className="text-xl font-bold leading-tight text-foreground">Alex</h2>
+            <h2 className="text-xl font-bold leading-tight text-foreground">{user.displayName || user.email}</h2>
           </div>
         </div>
         <Button variant="ghost" size="icon" className="rounded-full bg-card border-border/50 border">

@@ -1,21 +1,40 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useAuth, useUser } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { placeholderImages } from "@/lib/placeholder-images";
-import { Medal, Star, Zap } from "lucide-react";
+import { Loader2, LogOut, Medal, Star, Zap } from "lucide-react";
 
 export default function ProfilePage() {
-    const userImage = placeholderImages.find(p => p.id === 'user-avatar');
+    const { user, isUserLoading } = useUser();
+    const auth = useAuth();
+    const router = useRouter();
+
+    const handleSignOut = async () => {
+        await auth.signOut();
+        router.push('/login');
+    };
+    
+    if (isUserLoading || !user) {
+        return (
+          <div className="flex h-full w-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        );
+    }
 
     return (
         <div className="flex h-full flex-col">
             <header className="p-6 text-center">
                 <div className="flex flex-col items-center">
                     <Avatar className="h-24 w-24 border-4 border-primary mb-4">
-                        {userImage && <AvatarImage src={userImage.imageUrl} alt={userImage.description} data-ai-hint={userImage.imageHint}/>}
-                        <AvatarFallback>ZF</AvatarFallback>
+                         {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />}
+                        <AvatarFallback>{user.displayName ? user.displayName.charAt(0) : (user.email ? user.email.charAt(0).toUpperCase() : 'U')}</AvatarFallback>
                     </Avatar>
-                    <h1 className="text-2xl font-bold">Alex</h1>
-                    <p className="text-muted-foreground">Joined 1 month ago</p>
+                    <h1 className="text-2xl font-bold">{user.displayName || user.email}</h1>
+                    <p className="text-muted-foreground">Joined {user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : ''}</p>
                 </div>
             </header>
             <div className="flex-1 space-y-6 p-6 pt-0">
@@ -46,10 +65,13 @@ export default function ProfilePage() {
                 </Card>
                  <Card>
                     <CardHeader>
-                        <CardTitle>Settings</CardTitle>
+                        <CardTitle>Account</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">App settings will be available here in a future update.</p>
+                        <Button variant="destructive" className="w-full" onClick={handleSignOut}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Sign Out
+                        </Button>
                     </CardContent>
                 </Card>
             </div>

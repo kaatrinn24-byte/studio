@@ -2,17 +2,28 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, Home, User } from 'lucide-react';
+import { BarChart3, Home, User, Music } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUser } from '@/firebase';
 
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
+  { href: '/sounds', label: 'Sounds', icon: Music },
   { href: '/stats', label: 'Stats', icon: BarChart3 },
   { href: '/profile', label: 'Profile', icon: User },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { user } = useUser();
+
+  if (pathname === '/login') {
+    return null;
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <nav className="sticky bottom-6 z-20 mx-6">
