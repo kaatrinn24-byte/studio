@@ -1,22 +1,11 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { BookOpen, Crosshair, Headphones, Loader2, Lightbulb } from "lucide-react";
+import { BookOpen, Crosshair, Headphones, Loader2 } from "lucide-react";
 import { ModeCard } from "@/components/mode-card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { generatePersonalizedFocusTips } from '@/ai/flows/personalized-focus-tips';
 
 const modes = [
   {
@@ -48,18 +37,9 @@ const modes = [
   }
 ];
 
-const moods = ["Stressed", "Productive", "Chill", "Tired", "Energetic"];
-
 export default function Home() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
-  const { toast } = useToast();
-
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedMode, setSelectedMode] = useState<{ name: string; href: string } | null>(null);
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
-  const [tip, setTip] = useState<string>('');
-  const [isGenerating, startTransition] = useTransition();
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -67,37 +47,8 @@ export default function Home() {
     }
   }, [user, isUserLoading, router]);
   
-  const handleModeClick = (mode: { name: string; href: string; }) => {
-    setSelectedMode(mode);
-    setSelectedMood(null);
-    setTip('');
-    setIsDialogOpen(true);
-  };
-  
-  const handleMoodSelect = (mood: string) => {
-    if (!selectedMode) return;
-    setSelectedMood(mood);
-    setTip('');
-    startTransition(async () => {
-      try {
-        const result = await generatePersonalizedFocusTips({ mood, mode: selectedMode.name.toLowerCase() });
-        setTip(result.tip);
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: 'Error',
-          description: 'Could not generate a tip. Please try again.',
-          variant: 'destructive',
-        });
-      }
-    });
-  };
-
-  const handleProceed = () => {
-    if (selectedMode && selectedMood) {
-      setIsDialogOpen(false);
-      router.push(`${selectedMode.href}?mood=${encodeURIComponent(selectedMood)}`);
-    }
+  const handleModeClick = (mode: { href: string; }) => {
+    router.push(mode.href);
   };
   
   if (isUserLoading || !user) {
@@ -139,53 +90,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Quick Focus Tip</DialogTitle>
-            <DialogDescription>
-              Before we start, how are you feeling right now? This will help us give you a personalized tip.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="pt-4">
-            <h3 className="text-sm font-semibold mb-2">Select your current mood:</h3>
-            <div className="flex flex-wrap gap-2">
-              {moods.map((mood) => (
-                <Button
-                  key={mood}
-                  variant={selectedMood === mood ? 'default' : 'outline'}
-                  className="rounded-full"
-                  onClick={() => handleMoodSelect(mood)}
-                  disabled={isGenerating}
-                >
-                  {mood}
-                </Button>
-              ))}
-            </div>
-          </div>
-          {(isGenerating || tip) && (
-            <div className="mt-4 rounded-lg bg-secondary/20 p-4">
-              <h4 className="flex items-center gap-2 font-semibold text-primary">
-                <Lightbulb className="w-4 h-4" />
-                Here's a tip for you:
-              </h4>
-              {isGenerating && !tip ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                  <Loader2 className="w-4 h-4 animate-spin"/>
-                  <span>Generating your tip...</span>
-                </div>
-              ) : (
-                <p className="text-foreground/90 mt-2 italic">"{tip}"</p>
-              )}
-            </div>
-          )}
-          <DialogFooter className="mt-4">
-            <Button onClick={handleProceed} disabled={!selectedMood || isGenerating} className="w-full">
-              Proceed to Setup
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

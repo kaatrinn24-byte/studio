@@ -1,16 +1,15 @@
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Music, PlayCircle, Timer as TimerIcon, Loader2 } from 'lucide-react';
+import { ArrowLeft, Music, PlayCircle, Timer as TimerIcon } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
-import { generateSoundRecommendations, SoundRecommendation } from '@/ai/flows/sound-recommendations';
+import type { SoundRecommendation } from '@/ai/flows/sound-recommendations';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const durations = [15, 30, 60];
@@ -24,37 +23,14 @@ const staticSoundscapes: SoundRecommendation[] = [
 export default function ModeSetupPage() {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { toast } = useToast();
   
   const mode = Array.isArray(params.mode) ? params.mode[0] : String(params.mode);
-  const mood = searchParams.get('mood');
 
   const [selectedDuration, setSelectedDuration] = useState<number>(30);
-  const [soundscapes, setSoundscapes] = useState<SoundRecommendation[]>(staticSoundscapes);
+  const [soundscapes] = useState<SoundRecommendation[]>(staticSoundscapes);
   const [selectedSoundscape, setSelectedSoundscape] = useState<string>(staticSoundscapes[0].soundUrl);
-  const [isGenerating, startTransition] = useTransition();
+  const [isGenerating] = useState(false);
 
-  useEffect(() => {
-    if (mood) {
-      startTransition(async () => {
-        try {
-          const result = await generateSoundRecommendations({ mood });
-          if (result.recommendations && result.recommendations.length > 0) {
-            setSoundscapes([...result.recommendations, ...staticSoundscapes]);
-            setSelectedSoundscape(result.recommendations[0].soundUrl);
-          }
-        } catch (error) {
-          console.error('Failed to get recommendations', error);
-          toast({
-            title: 'AI Error',
-            description: 'Could not generate soundscapes. Using defaults.',
-            variant: 'destructive',
-          });
-        }
-      });
-    }
-  }, [mood, toast]);
   
   const handleStart = () => {
     const sound = soundscapes.find(s => s.soundUrl === selectedSoundscape);
@@ -98,7 +74,7 @@ export default function ModeSetupPage() {
         <section>
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
               <Music className="w-5 h-5" />
-              AI Soundscape {mood ? `for a ${mood} mood` : ''}
+              Soundscape
             </h2>
             {isGenerating ? (
               <div className="grid grid-cols-3 gap-4">
