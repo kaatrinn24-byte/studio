@@ -5,7 +5,7 @@ import BottomNav from '@/components/bottom-nav';
 import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'ZenithFlow',
+  title: 'CalMind',
   description: 'Find your perfect flow for studying, focusing, and relaxing.',
 };
 

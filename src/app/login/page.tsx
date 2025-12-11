@@ -100,7 +100,7 @@ export default function LoginPage() {
     <div className="flex h-full flex-col items-center justify-center p-6 bg-muted/30">
       <div className="text-center mb-8">
         <Zap className="mx-auto h-12 w-12 text-primary" />
-        <h1 className="text-3xl font-bold mt-4">Welcome to ZenithFlow</h1>
+        <h1 className="text-3xl font-bold mt-4">Welcome to CalMind</h1>
         <p className="text-muted-foreground">Sign in to track your habits and find your flow.</p>
       </div>
 

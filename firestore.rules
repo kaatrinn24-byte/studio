@@ -1,5 +1,5 @@
 /**
- * This is a set of Firestore Security Rules for the ZenithFlow application.
+ * This is a set of Firestore Security Rules for the CalMind application.
  *
  * Core Philosophy:
  * This ruleset enforces a strict user-ownership model. All user-generated content,
